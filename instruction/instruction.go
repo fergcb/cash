@@ -13,6 +13,7 @@ const (
 	INST_PUSH
 	INST_DUP
 	INST_DUP2
+	INST_SWAP
 	INST_ADD
 	INST_SUB
 	INST_MUL
@@ -26,6 +27,9 @@ const (
 	INST_BRZ
 	INST_BRP
 	INST_BRN
+	INST_CALL
+	INST_ARG
+	INST_RETURN
 )
 
 func (inst_type InstType) Name() string {
@@ -43,6 +47,8 @@ func (inst_type InstType) Name() string {
 		return "DUP"
 	case INST_DUP2:
 		return "DUP2"
+	case INST_SWAP:
+		return "SWAP"
 	case INST_ADD:
 		return "ADD"
 	case INST_SUB:
@@ -71,6 +77,12 @@ func (inst_type InstType) Name() string {
 		return "BRP"
 	case INST_BRN:
 		return "BRN"
+	case INST_CALL:
+		return "CALL"
+	case INST_ARG:
+		return "ARG"
+	case INST_RETURN:
+		return "RETURN"
 	}
 
 	return "INVALID_INSTRUCTION"
