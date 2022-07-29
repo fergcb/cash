@@ -15,7 +15,9 @@ var labelPattern, _ = regexp.Compile(`^[a-z_]+\s*:$`)
 func Parse(scanner *bufio.Scanner) ([]inst.Inst, error) {
 	lines := make([]string, 0)
 	for scanner.Scan() {
-		lines = append(lines, strings.TrimSpace(scanner.Text()))
+		line := scanner.Text()
+		line = strings.TrimSpace(strings.Split(line, ";")[0])
+		lines = append(lines, line)
 	}
 
 	labels := make(map[string]word.Word)

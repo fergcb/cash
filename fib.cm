@@ -1,26 +1,27 @@
-    PUSH 15 
-    CALL 4 
+    PUSH 15
+    CALL 4
     DUMP
-    HALT  
+    HALT
+
+
 fib:
-    ARG 0 
-    BRZ fib_zero 
-    ARG 0 
-    PUSH 1 
+    ARG 0
+    BRZ fib_ident ; fib(0) => 0
+    ARG 0
+    PUSH 1
     SUB
-    BRZ fib_zero 
-    ARG 0 
-    PUSH 1 
+    BRZ fib_ident ; fib(1) => 1
+    ARG 0
+    PUSH 1
     SUB
-    ARG 0 
-    PUSH 2 
+    CALL 4        ; fib(n-1)
+    ARG 0
+    PUSH 2
     SUB
-    CALL 4 
-    SWAP
-    CALL 4 
-    ADD
+    CALL 4        ; fib(n-2)
+    ADD           ; fib(n-2) + fib(n-1)
     BRA fib_ret
-  fib_zero:
-    ARG 0 
+  fib_ident:
+    ARG 0         ; return n
   fib_ret:
-    RETURN 1
+    RETURN 1      ; return fib(n-2) + fib(n-1)
