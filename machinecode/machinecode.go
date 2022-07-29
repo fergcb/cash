@@ -23,7 +23,7 @@ func Parse(scanner *bufio.Scanner) ([]inst.Inst, error) {
 	for _, line := range lines {
 		match := labelPattern.MatchString(line)
 		if match {
-			labelText := strings.TrimSpace(line[:1])
+			labelText := strings.TrimSpace(line[:len(line)-1])
 			labels[labelText] = word.Word(i)
 		} else {
 			lines[i] = line

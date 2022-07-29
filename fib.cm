@@ -1,24 +1,26 @@
-PUSH 15 
-CALL 4 
-DUMP
-HALT  
-
-ARG 0 
-BRZ 21 
-ARG 0 
-PUSH 1 
-SUB
-BRZ 21 
-ARG 0 
-PUSH 1 
-SUB
-ARG 0 
-PUSH 2 
-SUB
-CALL 4 
-SWAP
-CALL 4 
-ADD
-BRA 22 
-ARG 0 
-RETURN 1 
+    PUSH 15 
+    CALL 4 
+    DUMP
+    HALT  
+fib:
+    ARG 0 
+    BRZ fib_zero 
+    ARG 0 
+    PUSH 1 
+    SUB
+    BRZ fib_zero 
+    ARG 0 
+    PUSH 1 
+    SUB
+    ARG 0 
+    PUSH 2 
+    SUB
+    CALL 4 
+    SWAP
+    CALL 4 
+    ADD
+    BRA fib_ret
+  fib_zero:
+    ARG 0 
+  fib_ret:
+    RETURN 1
