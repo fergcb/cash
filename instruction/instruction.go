@@ -32,60 +32,56 @@ const (
 	INST_RETURN
 )
 
-func (inst_type InstType) Name() string {
-	var i interface{} = inst_type
-	it := i.(InstType)
+var mnemonics = map[InstType]string{
+	INST_NOP:    "NOP",
+	INST_HALT:   "HALT",
+	INST_PUSH:   "PUSH",
+	INST_DUP:    "DUP",
+	INST_DUP2:   "DUP2",
+	INST_SWAP:   "SWAP",
+	INST_ADD:    "ADD",
+	INST_SUB:    "SUB",
+	INST_MUL:    "MUL",
+	INST_DIV:    "DIV",
+	INST_MOD:    "MOD",
+	INST_INC:    "INC",
+	INST_DEC:    "DEC",
+	INST_DUMP:   "DUMP",
+	INST_BRA:    "BRA",
+	INST_BRE:    "BRE",
+	INST_BRT:    "BRT",
+	INST_BRZ:    "BRZ",
+	INST_BRP:    "BRP",
+	INST_BRN:    "BRN",
+	INST_CALL:   "CALL",
+	INST_ARG:    "ARG",
+	INST_RETURN: "RETURN",
+}
 
-	switch it {
-	case INST_NOP:
-		return "NOP"
-	case INST_HALT:
-		return "HALT"
-	case INST_PUSH:
-		return "PUSH"
-	case INST_DUP:
-		return "DUP"
-	case INST_DUP2:
-		return "DUP2"
-	case INST_SWAP:
-		return "SWAP"
-	case INST_ADD:
-		return "ADD"
-	case INST_SUB:
-		return "SUB"
-	case INST_MUL:
-		return "MUL"
-	case INST_DIV:
-		return "DIV"
-	case INST_MOD:
-		return "MOD"
-	case INST_INC:
-		return "INC"
-	case INST_DEC:
-		return "DEC"
-	case INST_DUMP:
-		return "DUMP"
-	case INST_BRA:
-		return "BRA"
-	case INST_BRE:
-		return "BRE"
-	case INST_BRT:
-		return "BRT"
-	case INST_BRZ:
-		return "BRZ"
-	case INST_BRP:
-		return "BRP"
-	case INST_BRN:
-		return "BRN"
-	case INST_CALL:
-		return "CALL"
-	case INST_ARG:
-		return "ARG"
-	case INST_RETURN:
-		return "RETURN"
+var opcodes = MakeOpcodesMap(mnemonics)
+
+func MakeOpcodesMap(mnemonics map[InstType]string) map[string]InstType {
+	opcodes := make(map[string]InstType)
+	for opcode, mnemonic := range mnemonics {
+		opcodes[mnemonic] = opcode
+	}
+	return opcodes
+}
+
+func (instType InstType) Name() string {
+	if val, ok := mnemonics[instType]; ok {
+		return val
 	}
 
 	return "INVALID_INSTRUCTION"
+}
+
+func typeFromMnemonic(mnemonic string) InstType {
+	if val, ok := opcodes[mnemonic]; ok {
+		return val
+	}
+
+	return 0
 }
 
 type Inst struct {
@@ -95,4 +91,9 @@ type Inst struct {
 
 func (instType InstType) New(operands ...Word) *Inst {
 	return &Inst{instType, operands}
+}
+
+func FromMnemonic(mnemonic string, operands ...Word) *Inst {
+	instType := typeFromMnemonic(mnemonic)
+	return instType.New(operands...)
 }
