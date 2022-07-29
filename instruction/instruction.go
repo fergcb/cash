@@ -85,15 +85,15 @@ func typeFromMnemonic(mnemonic string) InstType {
 }
 
 type Inst struct {
-	Type     InstType
-	Operands []Word
+	Type    InstType
+	Operand Word
 }
 
-func (instType InstType) New(operands ...Word) *Inst {
-	return &Inst{instType, operands}
+func (instType InstType) New(operand Word) *Inst {
+	return &Inst{instType, operand}
 }
 
-func FromMnemonic(mnemonic string, operands ...Word) *Inst {
+func FromMnemonic(mnemonic string, operand Word) *Inst {
 	instType := typeFromMnemonic(mnemonic)
-	return instType.New(operands...)
+	return instType.New(operand)
 }

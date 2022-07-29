@@ -85,7 +85,7 @@ func (m *Machine) Execute(inst Inst) error {
 		return nil
 
 	case INST_PUSH:
-		value := inst.Operands[0]
+		value := inst.Operand
 		stack.Push(value)
 		m.ip += 1
 		return nil
@@ -161,13 +161,13 @@ func (m *Machine) Execute(inst Inst) error {
 		return nil
 
 	case INST_BRA:
-		m.ip = inst.Operands[0]
+		m.ip = inst.Operand
 		return nil
 
 	case INST_BRE:
 		values := popN(stack, 2)
 		if values[0] == values[1] {
-			m.ip = inst.Operands[0]
+			m.ip = inst.Operand
 		} else {
 			m.ip += 1
 		}
@@ -177,7 +177,7 @@ func (m *Machine) Execute(inst Inst) error {
 		value, err := stack.Pop()
 		e.Check(err)
 		if value != 0 {
-			m.ip = inst.Operands[0]
+			m.ip = inst.Operand
 		} else {
 			m.ip += 1
 		}
@@ -187,7 +187,7 @@ func (m *Machine) Execute(inst Inst) error {
 		value, err := stack.Pop()
 		e.Check(err)
 		if value == 0 {
-			m.ip = inst.Operands[0]
+			m.ip = inst.Operand
 		} else {
 			m.ip += 1
 		}
@@ -197,7 +197,7 @@ func (m *Machine) Execute(inst Inst) error {
 		value, err := stack.Pop()
 		e.Check(err)
 		if value > 0 {
-			m.ip = inst.Operands[0]
+			m.ip = inst.Operand
 		} else {
 			m.ip += 1
 		}
@@ -207,7 +207,7 @@ func (m *Machine) Execute(inst Inst) error {
 		value, err := stack.Pop()
 		e.Check(err)
 		if value < 0 {
-			m.ip = inst.Operands[0]
+			m.ip = inst.Operand
 		} else {
 			m.ip += 1
 		}
@@ -215,13 +215,13 @@ func (m *Machine) Execute(inst Inst) error {
 
 	case INST_CALL:
 		m.callStack.PushFrame(m.ip)
-		m.ip = inst.Operands[0]
+		m.ip = inst.Operand
 		return nil
 
 	case INST_ARG:
 		parent, err := m.callStack.ParentFrame()
 		e.Check(err)
-		index := int(inst.Operands[0])
+		index := int(inst.Operand)
 		value, err := parent.Stack.AccessRandom(index)
 		e.Check(err)
 		stack.Push(value)
@@ -232,7 +232,7 @@ func (m *Machine) Execute(inst Inst) error {
 		parent, err := m.callStack.ParentFrame()
 		e.Check(err)
 
-		argCount := int(inst.Operands[0])
+		argCount := int(inst.Operand)
 		for i := 0; i < argCount; i++ {
 			parent.Stack.Pop()
 		}

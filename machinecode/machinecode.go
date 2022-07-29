@@ -39,23 +39,27 @@ func Parse(scanner *bufio.Scanner) ([]inst.Inst, error) {
 			continue
 		}
 
-		mnemonic := fields[0]
-		fields = fields[1:]
+		if len(fields) > 2 {
+			return nil, fmt.Errorf("malformed instruction '%s', should have no more than 1 operand", line)
+		}
 
-		args := make([]word.Word, len(fields))
-		for i, field := range fields {
-			if val, ok := labels[field]; ok {
-				args[i] = val
+		mnemonic := fields[0]
+		operand := word.Word(0)
+
+		if len(fields) == 2 {
+			arg := fields[1]
+			if val, ok := labels[arg]; ok {
+				operand = val
 			} else {
-				val, err := strconv.Atoi(field)
+				val, err := strconv.Atoi(arg)
 				if err != nil {
-					return nil, fmt.Errorf("malformed operand in '%s' at field '%s'", line, field)
+					return nil, fmt.Errorf("malformed operand in '%s'", line)
 				}
-				args[i] = word.Word(val)
+				operand = word.Word(val)
 			}
 		}
 
-		instruction := inst.FromMnemonic(mnemonic, args...)
+		instruction := inst.FromMnemonic(mnemonic, operand)
 		program = append(program, *instruction)
 	}
 	return program, nil
