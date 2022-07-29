@@ -2,6 +2,7 @@ package machine
 
 import (
 	. "cash/callstack"
+	e "cash/error"
 	. "cash/instruction"
 	. "cash/stack"
 	. "cash/word"
@@ -40,28 +41,24 @@ func (m *Machine) LoadProgram(program []Inst) {
 	m.program_size = Word(len(program))
 }
 
-func peekN(stack *Stack, count int) ([]Word, error) {
+func peekN(stack *Stack, count int) []Word {
 	values := []Word{}
 	for i := 0; i < count; i++ {
 		value, err := stack.AccessRandom(i)
-		if err != nil {
-			return nil, err
-		}
+		e.Check(err)
 		values = append([]Word{value}, values...)
 	}
-	return values, nil
+	return values
 }
 
-func popN(stack *Stack, count int) ([]Word, error) {
+func popN(stack *Stack, count int) []Word {
 	values := []Word{}
 	for i := 0; i < count; i++ {
 		value, err := stack.Pop()
-		if err != nil {
-			return nil, err
-		}
+		e.Check(err)
 		values = append([]Word{value}, values...)
 	}
-	return values, nil
+	return values
 }
 
 func (m *Machine) Execute(inst Inst) error {
@@ -103,67 +100,46 @@ func (m *Machine) Execute(inst Inst) error {
 		return nil
 
 	case INST_DUP2:
-		values, err := peekN(stack, 2)
-		if err != nil {
-			return err
-		}
+		values := peekN(stack, 2)
 		stack.Push(values[0])
 		stack.Push(values[1])
 		m.ip += 1
 		return nil
 
 	case INST_SWAP:
-		values, err := popN(stack, 2)
-		if err != nil {
-			return err
-		}
+		values := popN(stack, 2)
 		stack.Push(values[1])
 		stack.Push(values[0])
 		m.ip += 1
 		return nil
 
 	case INST_ADD:
-		values, err := popN(stack, 2)
-		if err != nil {
-			return err
-		}
+		values := popN(stack, 2)
 		res := values[0] + values[1]
 		stack.Push(res)
 		m.ip += 1
 		return nil
 
 	case INST_SUB:
-		values, err := popN(stack, 2)
-		if err != nil {
-			return err
-		}
+		values := popN(stack, 2)
 		stack.Push(values[0] - values[1])
 		m.ip += 1
 		return nil
 
 	case INST_MUL:
-		values, err := popN(stack, 2)
-		if err != nil {
-			return err
-		}
+		values := popN(stack, 2)
 		stack.Push(values[0] * values[1])
 		m.ip += 1
 		return nil
 
 	case INST_DIV:
-		values, err := popN(stack, 2)
-		if err != nil {
-			return err
-		}
+		values := popN(stack, 2)
 		stack.Push(values[0] / values[1])
 		m.ip += 1
 		return nil
 
 	case INST_MOD:
-		values, err := popN(stack, 2)
-		if err != nil {
-			return err
-		}
+		values := popN(stack, 2)
 		stack.Push(values[0] % values[1])
 		m.ip += 1
 		return nil
@@ -179,9 +155,7 @@ func (m *Machine) Execute(inst Inst) error {
 
 	case INST_DEC:
 		value, err := stack.Pop()
-		if err != nil {
-			return err
-		}
+		e.Check(err)
 		stack.Push(value - 1)
 		m.ip += 1
 		return nil
@@ -191,10 +165,7 @@ func (m *Machine) Execute(inst Inst) error {
 		return nil
 
 	case INST_BRE:
-		values, err := popN(stack, 2)
-		if err != nil {
-			return err
-		}
+		values := popN(stack, 2)
 		if values[0] == values[1] {
 			m.ip = inst.Operands[0]
 		} else {
@@ -204,9 +175,7 @@ func (m *Machine) Execute(inst Inst) error {
 
 	case INST_BRT:
 		value, err := stack.Pop()
-		if err != nil {
-			return err
-		}
+		e.Check(err)
 		if value != 0 {
 			m.ip = inst.Operands[0]
 		} else {
@@ -216,9 +185,7 @@ func (m *Machine) Execute(inst Inst) error {
 
 	case INST_BRZ:
 		value, err := stack.Pop()
-		if err != nil {
-			return err
-		}
+		e.Check(err)
 		if value == 0 {
 			m.ip = inst.Operands[0]
 		} else {
@@ -228,9 +195,7 @@ func (m *Machine) Execute(inst Inst) error {
 
 	case INST_BRP:
 		value, err := stack.Pop()
-		if err != nil {
-			return err
-		}
+		e.Check(err)
 		if value > 0 {
 			m.ip = inst.Operands[0]
 		} else {
@@ -240,9 +205,7 @@ func (m *Machine) Execute(inst Inst) error {
 
 	case INST_BRN:
 		value, err := stack.Pop()
-		if err != nil {
-			return err
-		}
+		e.Check(err)
 		if value < 0 {
 			m.ip = inst.Operands[0]
 		} else {
@@ -257,23 +220,17 @@ func (m *Machine) Execute(inst Inst) error {
 
 	case INST_ARG:
 		parent, err := m.callStack.ParentFrame()
-		if err != nil {
-			return err
-		}
+		e.Check(err)
 		index := int(inst.Operands[0])
 		value, err := parent.Stack.AccessRandom(index)
-		if err != nil {
-			return err
-		}
+		e.Check(err)
 		stack.Push(value)
 		m.ip += 1
 		return nil
 
 	case INST_RETURN:
 		parent, err := m.callStack.ParentFrame()
-		if err != nil {
-			return err
-		}
+		e.Check(err)
 
 		argCount := int(inst.Operands[0])
 		for i := 0; i < argCount; i++ {
