@@ -2,8 +2,8 @@ package machine
 
 import (
 	e "cash/error"
-	. "cash/instruction"
-	. "cash/word"
+	inst "cash/instruction"
+	"cash/word"
 	"errors"
 	"fmt"
 	"os"
@@ -17,16 +17,16 @@ const (
 )
 
 type Machine struct {
-	program      []Inst
-	program_size Word
-	ip           Word
+	program      []inst.Inst
+	program_size word.Word
+	ip           word.Word
 	callStack    CallStack
 	halted       bool
 }
 
 func NewMachine() *Machine {
 	return &Machine{
-		program:      []Inst{},
+		program:      []inst.Inst{},
 		program_size: 0,
 		ip:           0,
 		callStack:    *NewCallStack(),
@@ -34,32 +34,32 @@ func NewMachine() *Machine {
 	}
 }
 
-func (m *Machine) LoadProgram(program []Inst) {
+func (m *Machine) LoadProgram(program []inst.Inst) {
 	m.program = program
-	m.program_size = Word(len(program))
+	m.program_size = word.Word(len(program))
 }
 
-func peekN(stack *Stack, count int) []Word {
-	values := []Word{}
+func peekN(stack *Stack, count int) []word.Word {
+	values := []word.Word{}
 	for i := 0; i < count; i++ {
 		value, err := stack.AccessRandom(i)
 		e.Check(err)
-		values = append([]Word{value}, values...)
+		values = append([]word.Word{value}, values...)
 	}
 	return values
 }
 
-func popN(stack *Stack, count int) []Word {
-	values := []Word{}
+func popN(stack *Stack, count int) []word.Word {
+	values := []word.Word{}
 	for i := 0; i < count; i++ {
 		value, err := stack.Pop()
 		e.Check(err)
-		values = append([]Word{value}, values...)
+		values = append([]word.Word{value}, values...)
 	}
 	return values
 }
 
-func (m *Machine) Execute(inst Inst) error {
+func (m *Machine) Execute(instruction inst.Inst) error {
 
 	frame, err := m.callStack.CurrentFrame()
 	if err != nil {
@@ -68,34 +68,34 @@ func (m *Machine) Execute(inst Inst) error {
 
 	stack := &frame.Stack
 
-	switch inst.Type {
-	case NOP:
+	switch instruction.Type {
+	case inst.NOP:
 		m.ip += 1
 		return nil
 
-	case HALT:
+	case inst.HALT:
 		m.halted = true
 		return nil
 
-	case DUMP:
+	case inst.DUMP:
 		fmt.Printf("Stack: %v\nip: %d\n", stack.Data, m.ip)
 		m.ip += 1
 		return nil
 
-	case PRINT:
+	case inst.PRINT:
 		value, err := stack.Pop()
 		e.Check(err)
 		fmt.Print(value)
 		m.ip += 1
 		return nil
 
-	case PUSH:
-		value := inst.Operand
+	case inst.PUSH:
+		value := instruction.Operand
 		stack.Push(value)
 		m.ip += 1
 		return nil
 
-	case DUP:
+	case inst.DUP:
 		value, err := stack.Peek()
 		if err != nil {
 			return err
@@ -104,52 +104,52 @@ func (m *Machine) Execute(inst Inst) error {
 		m.ip += 1
 		return nil
 
-	case DUP2:
+	case inst.DUP2:
 		values := peekN(stack, 2)
 		stack.Push(values[0])
 		stack.Push(values[1])
 		m.ip += 1
 		return nil
 
-	case SWAP:
+	case inst.SWAP:
 		values := popN(stack, 2)
 		stack.Push(values[1])
 		stack.Push(values[0])
 		m.ip += 1
 		return nil
 
-	case ADD:
+	case inst.ADD:
 		values := popN(stack, 2)
 		res := values[0] + values[1]
 		stack.Push(res)
 		m.ip += 1
 		return nil
 
-	case SUB:
+	case inst.SUB:
 		values := popN(stack, 2)
 		stack.Push(values[0] - values[1])
 		m.ip += 1
 		return nil
 
-	case MUL:
+	case inst.MUL:
 		values := popN(stack, 2)
 		stack.Push(values[0] * values[1])
 		m.ip += 1
 		return nil
 
-	case DIV:
+	case inst.DIV:
 		values := popN(stack, 2)
 		stack.Push(values[0] / values[1])
 		m.ip += 1
 		return nil
 
-	case MOD:
+	case inst.MOD:
 		values := popN(stack, 2)
 		stack.Push(values[0] % values[1])
 		m.ip += 1
 		return nil
 
-	case INC:
+	case inst.INC:
 		value, err := stack.Pop()
 		if err != nil {
 			return err
@@ -158,86 +158,86 @@ func (m *Machine) Execute(inst Inst) error {
 		m.ip += 1
 		return nil
 
-	case DEC:
+	case inst.DEC:
 		value, err := stack.Pop()
 		e.Check(err)
 		stack.Push(value - 1)
 		m.ip += 1
 		return nil
 
-	case BRA:
-		m.ip = inst.Operand
+	case inst.BRA:
+		m.ip = instruction.Operand
 		return nil
 
-	case BRE:
+	case inst.BRE:
 		values := popN(stack, 2)
 		if values[0] == values[1] {
-			m.ip = inst.Operand
+			m.ip = instruction.Operand
 		} else {
 			m.ip += 1
 		}
 		return nil
 
-	case BRT:
+	case inst.BRT:
 		value, err := stack.Pop()
 		e.Check(err)
 		if value != 0 {
-			m.ip = inst.Operand
+			m.ip = instruction.Operand
 		} else {
 			m.ip += 1
 		}
 		return nil
 
-	case BRZ:
+	case inst.BRZ:
 		value, err := stack.Pop()
 		e.Check(err)
 		if value == 0 {
-			m.ip = inst.Operand
+			m.ip = instruction.Operand
 		} else {
 			m.ip += 1
 		}
 		return nil
 
-	case BRP:
+	case inst.BRP:
 		value, err := stack.Pop()
 		e.Check(err)
 		if value > 0 {
-			m.ip = inst.Operand
+			m.ip = instruction.Operand
 		} else {
 			m.ip += 1
 		}
 		return nil
 
-	case BRN:
+	case inst.BRN:
 		value, err := stack.Pop()
 		e.Check(err)
 		if value < 0 {
-			m.ip = inst.Operand
+			m.ip = instruction.Operand
 		} else {
 			m.ip += 1
 		}
 		return nil
 
-	case CALL:
+	case inst.CALL:
 		m.callStack.PushFrame(m.ip)
-		m.ip = inst.Operand
+		m.ip = instruction.Operand
 		return nil
 
-	case ARG:
+	case inst.ARG:
 		parent, err := m.callStack.ParentFrame()
 		e.Check(err)
-		index := int(inst.Operand)
+		index := int(instruction.Operand)
 		value, err := parent.Stack.AccessRandom(index)
 		e.Check(err)
 		stack.Push(value)
 		m.ip += 1
 		return nil
 
-	case RETURN:
+	case inst.RETURN:
 		parent, err := m.callStack.ParentFrame()
 		e.Check(err)
 
-		argCount := int(inst.Operand)
+		argCount := int(instruction.Operand)
 		for i := 0; i < argCount; i++ {
 			parent.Stack.Pop()
 		}
@@ -257,7 +257,7 @@ func (m *Machine) Execute(inst Inst) error {
 
 func (m *Machine) Run() int {
 	for !m.halted {
-		if m.ip >= Word(m.program_size) {
+		if m.ip >= word.Word(m.program_size) {
 			fmt.Fprintf(os.Stderr, "invalid instruction access @%d\n", m.ip)
 			return 1
 		}
