@@ -84,6 +84,13 @@ func (m *Machine) Execute(inst Inst) error {
 		m.ip += 1
 		return nil
 
+	case INST_PRINT:
+		value, err := stack.Pop()
+		e.Check(err)
+		fmt.Print(value)
+		m.ip += 1
+		return nil
+
 	case INST_PUSH:
 		value := inst.Operand
 		stack.Push(value)

@@ -1,6 +1,6 @@
     PUSH 15
     CALL 4
-    DUMP
+    PRINT
     HALT
 
 

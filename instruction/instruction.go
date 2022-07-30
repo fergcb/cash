@@ -10,6 +10,7 @@ const (
 	INST_NOP InstType = iota
 	INST_HALT
 	INST_DUMP
+	INST_PRINT
 	INST_PUSH
 	INST_DUP
 	INST_DUP2
@@ -36,6 +37,7 @@ var mnemonics = map[InstType]string{
 	INST_NOP:    "NOP",
 	INST_HALT:   "HALT",
 	INST_PUSH:   "PUSH",
+	INST_PRINT:  "PRINT",
 	INST_DUP:    "DUP",
 	INST_DUP2:   "DUP2",
 	INST_SWAP:   "SWAP",
