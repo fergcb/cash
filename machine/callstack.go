@@ -1,19 +1,9 @@
-package callstack
+package machine
 
 import (
-	"cash/stack"
-	. "cash/word"
+	"cash/word"
 	"errors"
 )
-
-type StackFrame struct {
-	Stack         stack.Stack
-	ReturnAddress Word
-}
-
-func NewStackFrame(returnAddress Word) *StackFrame {
-	return &StackFrame{stack.Stack{}, returnAddress}
-}
 
 type CallStack struct {
 	Frames []StackFrame
@@ -23,7 +13,7 @@ func NewCallStack() *CallStack {
 	return &CallStack{make([]StackFrame, 1)}
 }
 
-func (cs *CallStack) PushFrame(returnAddress Word) {
+func (cs *CallStack) PushFrame(returnAddress word.Word) {
 	cs.Frames = append(cs.Frames, *NewStackFrame(returnAddress))
 }
 

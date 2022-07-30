@@ -1,10 +1,8 @@
 package machine
 
 import (
-	. "cash/callstack"
 	e "cash/error"
 	. "cash/instruction"
-	. "cash/stack"
 	. "cash/word"
 	"errors"
 	"fmt"
