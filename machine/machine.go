@@ -71,33 +71,33 @@ func (m *Machine) Execute(inst Inst) error {
 	stack := &frame.Stack
 
 	switch inst.Type {
-	case INST_NOP:
+	case NOP:
 		m.ip += 1
 		return nil
 
-	case INST_HALT:
+	case HALT:
 		m.halted = true
 		return nil
 
-	case INST_DUMP:
+	case DUMP:
 		fmt.Printf("Stack: %v\nip: %d\n", stack.Data, m.ip)
 		m.ip += 1
 		return nil
 
-	case INST_PRINT:
+	case PRINT:
 		value, err := stack.Pop()
 		e.Check(err)
 		fmt.Print(value)
 		m.ip += 1
 		return nil
 
-	case INST_PUSH:
+	case PUSH:
 		value := inst.Operand
 		stack.Push(value)
 		m.ip += 1
 		return nil
 
-	case INST_DUP:
+	case DUP:
 		value, err := stack.Peek()
 		if err != nil {
 			return err
@@ -106,52 +106,52 @@ func (m *Machine) Execute(inst Inst) error {
 		m.ip += 1
 		return nil
 
-	case INST_DUP2:
+	case DUP2:
 		values := peekN(stack, 2)
 		stack.Push(values[0])
 		stack.Push(values[1])
 		m.ip += 1
 		return nil
 
-	case INST_SWAP:
+	case SWAP:
 		values := popN(stack, 2)
 		stack.Push(values[1])
 		stack.Push(values[0])
 		m.ip += 1
 		return nil
 
-	case INST_ADD:
+	case ADD:
 		values := popN(stack, 2)
 		res := values[0] + values[1]
 		stack.Push(res)
 		m.ip += 1
 		return nil
 
-	case INST_SUB:
+	case SUB:
 		values := popN(stack, 2)
 		stack.Push(values[0] - values[1])
 		m.ip += 1
 		return nil
 
-	case INST_MUL:
+	case MUL:
 		values := popN(stack, 2)
 		stack.Push(values[0] * values[1])
 		m.ip += 1
 		return nil
 
-	case INST_DIV:
+	case DIV:
 		values := popN(stack, 2)
 		stack.Push(values[0] / values[1])
 		m.ip += 1
 		return nil
 
-	case INST_MOD:
+	case MOD:
 		values := popN(stack, 2)
 		stack.Push(values[0] % values[1])
 		m.ip += 1
 		return nil
 
-	case INST_INC:
+	case INC:
 		value, err := stack.Pop()
 		if err != nil {
 			return err
@@ -160,18 +160,18 @@ func (m *Machine) Execute(inst Inst) error {
 		m.ip += 1
 		return nil
 
-	case INST_DEC:
+	case DEC:
 		value, err := stack.Pop()
 		e.Check(err)
 		stack.Push(value - 1)
 		m.ip += 1
 		return nil
 
-	case INST_BRA:
+	case BRA:
 		m.ip = inst.Operand
 		return nil
 
-	case INST_BRE:
+	case BRE:
 		values := popN(stack, 2)
 		if values[0] == values[1] {
 			m.ip = inst.Operand
@@ -180,7 +180,7 @@ func (m *Machine) Execute(inst Inst) error {
 		}
 		return nil
 
-	case INST_BRT:
+	case BRT:
 		value, err := stack.Pop()
 		e.Check(err)
 		if value != 0 {
@@ -190,7 +190,7 @@ func (m *Machine) Execute(inst Inst) error {
 		}
 		return nil
 
-	case INST_BRZ:
+	case BRZ:
 		value, err := stack.Pop()
 		e.Check(err)
 		if value == 0 {
@@ -200,7 +200,7 @@ func (m *Machine) Execute(inst Inst) error {
 		}
 		return nil
 
-	case INST_BRP:
+	case BRP:
 		value, err := stack.Pop()
 		e.Check(err)
 		if value > 0 {
@@ -210,7 +210,7 @@ func (m *Machine) Execute(inst Inst) error {
 		}
 		return nil
 
-	case INST_BRN:
+	case BRN:
 		value, err := stack.Pop()
 		e.Check(err)
 		if value < 0 {
@@ -220,12 +220,12 @@ func (m *Machine) Execute(inst Inst) error {
 		}
 		return nil
 
-	case INST_CALL:
+	case CALL:
 		m.callStack.PushFrame(m.ip)
 		m.ip = inst.Operand
 		return nil
 
-	case INST_ARG:
+	case ARG:
 		parent, err := m.callStack.ParentFrame()
 		e.Check(err)
 		index := int(inst.Operand)
@@ -235,7 +235,7 @@ func (m *Machine) Execute(inst Inst) error {
 		m.ip += 1
 		return nil
 
-	case INST_RETURN:
+	case RETURN:
 		parent, err := m.callStack.ParentFrame()
 		e.Check(err)
 
