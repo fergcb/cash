@@ -1,10 +1,10 @@
 package instruction
 
 import (
-	. "cash/word"
+	"cash/word"
 )
 
-type InstType Word
+type InstType word.Word
 
 const (
 	NOP InstType = iota
@@ -12,6 +12,7 @@ const (
 	DUMP
 	PRINT
 	PUSH
+	VOID
 	DUP
 	DUP2
 	SWAP
@@ -31,33 +32,42 @@ const (
 	CALL
 	ARG
 	RETURN
+	ALLOC
+	DEALLOC
+	WRITE
+	READ
 )
 
 var mnemonics = map[InstType]string{
-	NOP:    "NOP",
-	HALT:   "HALT",
-	PUSH:   "PUSH",
-	PRINT:  "PRINT",
-	DUP:    "DUP",
-	DUP2:   "DUP2",
-	SWAP:   "SWAP",
-	ADD:    "ADD",
-	SUB:    "SUB",
-	MUL:    "MUL",
-	DIV:    "DIV",
-	MOD:    "MOD",
-	INC:    "INC",
-	DEC:    "DEC",
-	DUMP:   "DUMP",
-	BRA:    "BRA",
-	BRE:    "BRE",
-	BRT:    "BRT",
-	BRZ:    "BRZ",
-	BRP:    "BRP",
-	BRN:    "BRN",
-	CALL:   "CALL",
-	ARG:    "ARG",
-	RETURN: "RETURN",
+	NOP:     "NOP",
+	HALT:    "HALT",
+	PUSH:    "PUSH",
+	VOID:    "VOID",
+	PRINT:   "PRINT",
+	DUP:     "DUP",
+	DUP2:    "DUP2",
+	SWAP:    "SWAP",
+	ADD:     "ADD",
+	SUB:     "SUB",
+	MUL:     "MUL",
+	DIV:     "DIV",
+	MOD:     "MOD",
+	INC:     "INC",
+	DEC:     "DEC",
+	DUMP:    "DUMP",
+	BRA:     "BRA",
+	BRE:     "BRE",
+	BRT:     "BRT",
+	BRZ:     "BRZ",
+	BRP:     "BRP",
+	BRN:     "BRN",
+	CALL:    "CALL",
+	ARG:     "ARG",
+	RETURN:  "RETURN",
+	ALLOC:   "ALLOC",
+	DEALLOC: "DEALLOC",
+	WRITE:   "WRITE",
+	READ:    "READ",
 }
 
 var opcodes = MakeOpcodesMap(mnemonics)
@@ -88,14 +98,14 @@ func typeFromMnemonic(mnemonic string) InstType {
 
 type Inst struct {
 	Type    InstType
-	Operand Word
+	Operand word.Word
 }
 
-func (instType InstType) New(operand Word) *Inst {
+func (instType InstType) New(operand word.Word) *Inst {
 	return &Inst{instType, operand}
 }
 
-func FromMnemonic(mnemonic string, operand Word) *Inst {
+func FromMnemonic(mnemonic string, operand word.Word) *Inst {
 	instType := typeFromMnemonic(mnemonic)
 	return instType.New(operand)
 }

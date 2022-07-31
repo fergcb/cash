@@ -21,6 +21,7 @@ type Machine struct {
 	program_size word.Word
 	ip           word.Word
 	callStack    CallStack
+	heap         Heap
 	halted       bool
 }
 
@@ -30,6 +31,7 @@ func NewMachine() *Machine {
 		program_size: 0,
 		ip:           0,
 		callStack:    *NewCallStack(),
+		heap:         *NewHeap(1024),
 		halted:       false,
 	}
 }
@@ -78,7 +80,7 @@ func (m *Machine) Execute(instruction inst.Inst) error {
 		return nil
 
 	case inst.DUMP:
-		fmt.Printf("Stack: %v\nip: %d\n", stack.Data, m.ip)
+		fmt.Printf("Stack: %v\nHeap: %v\nip: %d\n", stack.Data, m.heap.Data, m.ip)
 		m.ip += 1
 		return nil
 
@@ -92,6 +94,11 @@ func (m *Machine) Execute(instruction inst.Inst) error {
 	case inst.PUSH:
 		value := instruction.Operand
 		stack.Push(value)
+		m.ip += 1
+		return nil
+
+	case inst.VOID:
+		stack.Pop()
 		m.ip += 1
 		return nil
 
@@ -250,6 +257,56 @@ func (m *Machine) Execute(instruction inst.Inst) error {
 		m.callStack.PopFrame()
 		m.ip = frame.ReturnAddress + 1
 		return nil
+
+	case inst.ALLOC:
+		size, err := stack.Pop()
+		e.Check(err)
+
+		offset, err := m.heap.Allocate(int(size))
+		e.Check(err)
+
+		stack.Push(word.Word(offset))
+
+		m.ip += 1
+		return nil
+
+	case inst.DEALLOC:
+		offset, err := stack.Pop()
+		e.Check(err)
+
+		size, err := stack.Pop()
+		e.Check(err)
+
+		m.heap.Deallocate(int(offset), int(size))
+
+		m.ip += 1
+		return nil
+
+	case inst.WRITE:
+		offset, err := stack.Pop()
+		e.Check(err)
+
+		value, err := stack.Pop()
+		e.Check(err)
+
+		next := m.heap.Write(int(offset), 1, []word.Word{value})
+
+		stack.Push(word.Word(next))
+
+		m.ip += 1
+		return nil
+
+	case inst.READ:
+		offset, err := stack.Pop()
+		e.Check(err)
+
+		value := m.heap.Read(int(offset), 1)[0]
+
+		stack.Push(value)
+
+		m.ip += 1
+		return nil
+
 	}
 
 	return errors.New("invalid opcode")
